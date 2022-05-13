@@ -340,6 +340,41 @@ def get_ARM_LPM_dims_dict():
     }
     return d
 
+def get_WAGENIGEN_dict():
+    
+    # _ToConfirmIntoData_encodings
+    
+    d = {
+        "RR_Intensity": "rainfall_rate_32bit",
+        "RR_Accumulated": "rainfall_accumulated_32bit",
+        "RR_Total": "rainfall_amount_absolute_32bit",
+        "Synop_WaWa": "weather_code_synop_4680",
+        "Synop_WW": "weather_code_synop_4677",
+        "Reflectivity": "reflectivity_32bit",
+        "Visibility": "mor_visibility",
+        "T_Sensor": "sensor_temperature",
+        "Sig_Laser": "laser_amplitude",
+        "N_Particles": "number_particles",
+        "State_Sensor": "sensor_status",
+        "E_kin": "rain_kinetic_energy",
+        "V_Sensor": "sensor_battery_voltage",
+        "I_Heating": "sensor_heating_current",
+        "Error_Code": "error_code",
+        "Data_Raw": "raw_drop_number",
+        "Data_N_Field": "raw_drop_concentration",
+        "Data_V_Field": "raw_drop_average_velocity",
+        }
+    return d
+
+def get_WAGENIGEN_dims_dict():
+    
+    d = {
+        
+        'times': 'time', 
+        'diameters': 'diameter_bin_center', 
+        'velocities': 'velocity_bin_center'
+    }
+    return d
 
 def get_dtype_standards_all_object(sensor_name):
     # TODO: move to dev_tools I would say... is not used by any parser right?
