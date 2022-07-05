@@ -41,6 +41,8 @@ def create_list_path(df, folder_output_path):
         # except FileExistsError:
         #     pass
     
+    print("Found {} paths for metadata files".format(len(list_path)))
+    
     return list_path
 
 def create_list_meta(df):
@@ -54,6 +56,8 @@ def create_list_meta(df):
     
     list_meta = df.to_dict('records')
     
+    print("Found {} metadata files".format(len(list_meta)))
+    
     return list_meta
 
 
@@ -64,6 +68,8 @@ def create_metadata_files(list_path, list_meta):
     for i in range(len(list_meta)):
         os.makedirs(os.path.dirname(list_path[i]), exist_ok=True)
         create_metadata(list_path[i], list_meta[i])
+    
+    print(" - Metadata files creation complete! - ")
         
 def clean_df(df):
     '''Clean the dataframe by comments into DSD metadata.csv'''
@@ -77,22 +83,59 @@ def clean_df(df):
     
     return df
 
-import pandas as pd 
+def check_csv(source_path):
+    '''Check if file in source_path is DSD metadata.csv'''
+    try:
+        df = pd.read_csv(source_path)
+    except pd.errors.EmptyDataError:
+        print("Something wrong with .csv, any metadata found, please check .csv file")
+        raise SystemExit
+    
+    # Check if df has right columns number
+    if len(df.columns) != 51:
+        print("Something wrong with .csv, the file should have 51 columns, {} were found, please check .csv file".format(len(df.columns)))
+        raise SystemExit
+    
+    print("File is Ok")
+    
+    return df
 
-# Path for DSD metadata.csv
-source_path = '/home/kimbo/Desktop/DSD metadata.csv'
+import pandas as pd
+import click
 
-# Output folder for the metadata
-folder_output_path = '/home/kimbo/data/metadata_test'
+# -------------------------------------------------------------------------.
+# CLIck Command Line Interface decorator
+@click.command()  # options_metavar='<options>'
+@click.argument('source_path', type=click.File('rb'))
+@click.argument('folder_output_path')
+def main(source_path,
+         folder_output_path
+         ):
+    
+    # Path for DSD metadata.csv
+    # source_path = '/home/kimbo/Downloads/DSD_metadata.csv'
 
-df = pd.read_csv(source_path)
+    # Output folder for the metadata
+    # folder_output_path = '/home/kimbo/data/metadata_test'
+    
+    df = check_csv(source_path)
 
-df = clean_df(df)
+    df = clean_df(df)
 
-list_path = create_list_path(df, folder_output_path)
+    list_path = create_list_path(df, folder_output_path)
 
-list_meta = create_list_meta(df)
+    list_meta = create_list_meta(df)
 
-create_metadata_files(list_path, list_meta)
+    # Check if list_path and list_meta have the same lenght
+    if len(list_path) != len(list_meta):
+        print('Something wrong with .csv')
+        raise SystemExit
+
+    create_metadata_files(list_path, list_meta)
+
+if __name__ == '__main__':
+    main()
+
+
 
 
