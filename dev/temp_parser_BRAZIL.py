@@ -139,7 +139,7 @@ file_list = sorted(glob.glob(device_path, recursive = True))
     
 reader_kwargs = {}
 # - Define delimiter
-reader_kwargs['delimiter'] = '  '
+reader_kwargs['delimiter'] = 'No_need_it'
 
 # - Avoid first column to become df index !!!
 reader_kwargs["index_col"] = False  
@@ -170,11 +170,11 @@ reader_kwargs["blocksize"] = None # "50MB"
 # Cast all to string
 reader_kwargs["dtype"] = str
 
-# Skip first row as columns names
-reader_kwargs['header'] = None
+# # Skip first row as columns names
+# reader_kwargs['header'] = None
 
-# Skip header
-reader_kwargs['skiprows'] = 1
+# # Skip header
+# reader_kwargs['skiprows'] = 1
 
 
 ####--------------------------------------------------------------------------. 
@@ -188,7 +188,7 @@ reader_kwargs['skiprows'] = 1
 
 
 
-filepath = file_list[0]
+filepath = file_list[3]
 
 str_reader_kwargs = reader_kwargs.copy() 
 df = read_raw_data(filepath, 
@@ -199,13 +199,58 @@ df = read_raw_data(filepath,
 df = read_raw_data(filepath, 
                     column_names=None,  
                     reader_kwargs=str_reader_kwargs, 
-                    lazy=False).add_prefix('col_')
+                    lazy=False)
 
-df[['col_3', 'col_3_1']] = df['col_3'].str.split(' ', n=1, expand=True)
+date = str(df.iloc[0])
 
-df[['TO_DROP','col_4', 'col_4_1']] = df['col_4'].str.split(' ', n=2, expand=True)
+date = date[:10]
 
-df[['TO_DROP_2','2', '3', '4', '5']] = df['col_5'].str.split(' ', n=4, expand=True)
+df.columns = ['TO_SPLIT']
+
+df[['time','TO_SPLIT']] = df['TO_SPLIT'].str.split(' ', n=1, expand=True)
+
+df['time'] = df['time'].str[:-3]
+
+df['time'] = df['time'] + '-' + date
+
+df['time'] = pd.to_datetime(df['time'], format='%M%S-%d/%m/%Y')
+
+df['TO_SPLIT'] = df['TO_SPLIT'].str.strip()
+
+df[['rainfall_rate_32bit','TO_SPLIT']] = df['TO_SPLIT'].str.split(' ', n=1, expand=True)
+
+df['TO_SPLIT'] = df['TO_SPLIT'].str.strip()
+
+df[['rainfall_accumulated_32bit','TO_SPLIT']] = df['TO_SPLIT'].str.split(' ', n=1, expand=True)
+
+df['TO_SPLIT'] = df['TO_SPLIT'].str.strip()
+
+df[['reflectivity_32bit','TO_SPLIT']] = df['TO_SPLIT'].str.split(' ', n=1, expand=True)
+
+df['TO_SPLIT'] = df['TO_SPLIT'].str.strip()
+
+df[['number_particles','TO_SPLIT']] = df['TO_SPLIT'].str.split(' ', n=1, expand=True)
+
+df[['sensor_status','TO_SPLIT']] = df['TO_SPLIT'].str.split(' ', n=1, expand=True)
+
+df['TO_SPLIT'] = df['TO_SPLIT'].str.strip()
+
+df[['error_code','TO_SPLIT']] = df['TO_SPLIT'].str.split(' ', n=1, expand=True)
+
+df[['raw_drop_concentration','TO_SPLIT']] = df['TO_SPLIT'].str.split(' ', n=1, expand=True)
+
+df[['raw_drop_average_velocity','raw_drop_number']] = df['TO_SPLIT'].str.split(' ', n=1, expand=True)
+
+df = df.drop(columns = ['TO_SPLIT'])
+
+# Add 0 digits to raw_drop_number
+for i, r in df.iterrows():
+    raw = ''
+    for n in r['raw_drop_number']:
+        if n != ',':
+            n = '%03d' % int(n) + ','
+            raw += n
+    df['raw_drop_number'] = raw
 
 # Print first rows
 print_df_first_n_rows(df, n = 1, column_names=False)
