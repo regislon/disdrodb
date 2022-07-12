@@ -246,7 +246,7 @@ def main(raw_dir,
                 raw += n
             df['raw_drop_number'] = raw
             
-        df.reset_index(drop=True)
+        df = df.reset_index(drop=True)
         
         return df  
     

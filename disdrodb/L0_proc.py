@@ -384,6 +384,9 @@ def _write_to_parquet(df, fpath, force=False):
     # -------------------------------------------------------------------------.
     # Check if a file already exists (and remove if force=True)
     _remove_if_exists(fpath, force=force)
+    
+    from disdrodb.io import _create_directory
+    _create_directory(os.path.dirname(fpath))
 
     # -------------------------------------------------------------------------.
     # Define writing options
