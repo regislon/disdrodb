@@ -1,16 +1,18 @@
-.. s documentation master file, created by
-   sphinx-quickstart on Fri Jul  1 10:27:02 2022.
+.. d documentation master file, created by
+   sphinx-quickstart on Wed Jul 13 14:44:07 2022.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to s's documentation!
+Welcome to disdroDB's documentation!
 =============================
 
 .. toctree::
-   :maxdepth: 4
-   :caption: Contents:
+   :maxdepth: 2
    
-   modules
+   overview
+   install
+   
+   :caption: Contents:
 
 
 
