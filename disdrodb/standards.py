@@ -116,6 +116,15 @@ def get_L0_dtype(sensor_name):
     d = read_config_yml(sensor_name=sensor_name, filename="L0_dtype.yml")
     return d
 
+# Maybe to create a yml file with this information?
+def get_default_str_divider(sensor_name):
+    dict_default_str_divider={
+        'OTT_Parsivel':',',
+        'OTT_Parsivel2': ',',
+        'Thies_LPM': ';',
+        'RD80': ','
+        }
+    return dict_default_str_divider[sensor_name]
 
 def get_L1_netcdf_encoding_dict(sensor_name):
     """Get a dictionary containing the encoding to write L1 netCDFs."""

@@ -91,6 +91,16 @@ def reshape_L0_raw_drop_number_matrix_to_2D(arr, n_bins_dict, n_timesteps):
         raise ValueError(msg)
     return arr
 
+def get_str_divider(df, sensor_name, lazy=False):
+    from disdrodb.standards import get_default_str_divider
+    split_str = get_default_str_divider(sensor_name) 
+    sample_str= df.head().reset_index(drop=True).at[0,'raw_drop_concentration']
+    # if lazy:
+    #    sample_str= sample_str.compute()
+    if sample_str.find(split_str) == -1:
+        split_str = sample_str[6]
+    return split_str
+
 
 def retrieve_L1_raw_arrays(df, sensor_name, lazy=True, verbose=False):
     # Log
@@ -109,24 +119,26 @@ def retrieve_L1_raw_arrays(df, sensor_name, lazy=True, verbose=False):
     else:
         n_timesteps = df.shape[0]
 
+    
+    split_str = get_str_divider(df, sensor_name, lazy)
 
-    if sensor_name in ['OTT_Parsivel', 'OTT_Parsivel2']:
-        split_str = ','
-        # Found a campaing (MELBOURNE_2007_OTT) with different different divider, this is a temporary solution
-        try:
-            if lazy:
-                if df.head().take([0]).at[0,'raw_drop_concentration'].find(',') == -1:
-                    split_str = df['raw_drop_concentration'][0][6]
-            else:
-                if df['raw_drop_concentration'][0].find(',') == -1:
-                    split_str = df['raw_drop_concentration'][0][6]
-        except KeyError:
-            msg = "Something wrong with divider for L1 matrix, default divider is ',', tried to parse with {}".format(split_str)
-            if verbose:
-                print(msg)
-            logger.info(msg)
-    if sensor_name in ['Thies_LPM']:
-        split_str = ';'
+    # if sensor_name in ['OTT_Parsivel', 'OTT_Parsivel2']:
+    #     split_str = ','
+    #     # Found a campaing (MELBOURNE_2007_OTT) with different different divider, this is a temporary solution
+    #     try:
+    #         if lazy:
+    #             if df.head().take([0]).at[0,'raw_drop_concentration'].find(',') == -1:
+    #                 split_str = df['raw_drop_concentration'][0][6]
+    #         else:
+    #             if df['raw_drop_concentration'][0].find(',') == -1:
+    #                 split_str = df['raw_drop_concentration'][0][6]
+    #     except KeyError:
+    #         msg = "Something wrong with divider for L1 matrix, default divider is ',', tried to parse with {}".format(split_str)
+    #         if verbose:
+    #             print(msg)
+    #         logger.info(msg)
+    # if sensor_name in ['Thies_LPM']:
+    #     split_str = ';'
     
     # Retrieve available arrays
     dict_data = {}
