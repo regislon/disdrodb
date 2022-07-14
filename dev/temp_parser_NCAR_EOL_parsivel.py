@@ -139,7 +139,7 @@ file_list = sorted(glob.glob(device_path, recursive = True))
     
 reader_kwargs = {}
 # - Define delimiter
-reader_kwargs['delimiter'] = 'No_need_it'
+reader_kwargs['delimiter'] = 'no_need_it'
 
 # - Avoid first column to become df index !!!
 reader_kwargs["index_col"] = False  
@@ -171,7 +171,7 @@ reader_kwargs["blocksize"] = None # "50MB"
 reader_kwargs["dtype"] = str
 
 # # Skip first row as columns names
-# reader_kwargs['header'] = None
+reader_kwargs['header'] = None
 
 # # Skip header
 # reader_kwargs['skiprows'] = 1
@@ -188,69 +188,60 @@ reader_kwargs["dtype"] = str
 
 
 
-# filepath = file_list[0]
+filepath = file_list[0]
 
 # str_reader_kwargs = reader_kwargs.copy() 
-# df = read_raw_data(filepath, 
-#                     column_names=None,  
-#                     reader_kwargs=str_reader_kwargs, 
-#                     lazy=True).add_prefix('col_').head(n=100)
+# # df = read_raw_data(filepath, 
+# #                     column_names=None,  
+# #                     reader_kwargs=str_reader_kwargs, 
+# #                     lazy=True).add_prefix('col_').head(n=100)
 
 # df = read_raw_data(filepath, 
 #                     column_names=None,  
 #                     reader_kwargs=str_reader_kwargs, 
-#                     lazy=False)
+#                     lazy=True)
 
-# date = str(df.iloc[0])
-
+# # Read date from header and then remove it
+# date = df.head().loc[0][0]
 # date = date[:10]
+# df = df.loc[1:]
 
+# # Split columns
 # df.columns = ['TO_SPLIT']
 
+# # Parse time
 # df[['time','TO_SPLIT']] = df['TO_SPLIT'].str.split(' ', n=1, expand=True)
-
 # df['time'] = df['time'].str[:-3]
-
 # df['time'] = df['time'] + '-' + date
+# df['time'] = dd.to_datetime(df['time'], format='%M%S-%m/%d/%Y')
 
-# df['time'] = pd.to_datetime(df['time'], format='%M%S-%d/%m/%Y')
 
-# df['TO_SPLIT'] = df['TO_SPLIT'].str.strip()
+# # Split columns
+# columns = ['rainfall_rate_32bit',
+#             'rainfall_accumulated_32bit',
+#             'reflectivity_32bit',
+#             'number_particles',
+#             'sensor_status',
+#             'error_code',
+#             'raw_drop_concentration',
+#             'raw_drop_average_velocity',
+#             # 'raw_drop_number'
+#             ]
 
-# df[['rainfall_rate_32bit','TO_SPLIT']] = df['TO_SPLIT'].str.split(' ', n=1, expand=True)
-
-# df['TO_SPLIT'] = df['TO_SPLIT'].str.strip()
-
-# df[['rainfall_accumulated_32bit','TO_SPLIT']] = df['TO_SPLIT'].str.split(' ', n=1, expand=True)
-
-# df['TO_SPLIT'] = df['TO_SPLIT'].str.strip()
-
-# df[['reflectivity_32bit','TO_SPLIT']] = df['TO_SPLIT'].str.split(' ', n=1, expand=True)
-
-# df['TO_SPLIT'] = df['TO_SPLIT'].str.strip()
-
-# df[['number_particles','TO_SPLIT']] = df['TO_SPLIT'].str.split(' ', n=1, expand=True)
-
-# df[['sensor_status','TO_SPLIT']] = df['TO_SPLIT'].str.split(' ', n=1, expand=True)
-
-# df['TO_SPLIT'] = df['TO_SPLIT'].str.strip()
-
-# df[['error_code','TO_SPLIT']] = df['TO_SPLIT'].str.split(' ', n=1, expand=True)
-
-# df[['raw_drop_concentration','TO_SPLIT']] = df['TO_SPLIT'].str.split(' ', n=1, expand=True)
-
-# df[['raw_drop_average_velocity','raw_drop_number']] = df['TO_SPLIT'].str.split(' ', n=1, expand=True)
-
-# df = df.drop(columns = ['TO_SPLIT'])
+# for c in columns:
+#     df['TO_SPLIT'] = df['TO_SPLIT'].str.strip()
+#     df[[c,'TO_SPLIT']] = df['TO_SPLIT'].str.split(' ', n=1, expand=True)
 
 # # Add 0 digits to raw_drop_number
 # for i, r in df.iterrows():
 #     raw = ''
-#     for n in r['raw_drop_number']:
+#     for n in r['TO_SPLIT']:
 #         if n != ',':
 #             n = '%03d' % int(n) + ','
 #             raw += n
 #     df['raw_drop_number'] = raw
+
+# df = df.drop(columns = ['TO_SPLIT'])
 
 # # Print first rows
 # print_df_first_n_rows(df, n = 1, column_names=False)
@@ -475,63 +466,50 @@ def df_sanitizer_fun(df, lazy=False):
         import pandas as dd
     
     # Read date from header and then remove it
-    if lazy:
-        temp = df.loc[0].compute()
-        date = temp.iloc[0][0][:10]
-    else:
-        date = df.iloc[0][0][:10]
+    date = df.head().loc[0][0]
+    date = date[:10]
     df = df.loc[1:]
 
-    # Split time
+    # Temporary column name
+    df.columns = ['TO_SPLIT']
+
+    # Parse time
+    # Suppress SettingWithCopyWarning with pandas
+    if not lazy:
+        dd.options.mode.chained_assignment = None
     df[['time','TO_SPLIT']] = df['TO_SPLIT'].str.split(' ', n=1, expand=True)
     df['time'] = df['time'].str[:-3]
     df['time'] = df['time'] + '-' + date
     df['time'] = dd.to_datetime(df['time'], format='%M%S-%m/%d/%Y')
 
-    # Remove useless spaces
-    df['TO_SPLIT'] = df['TO_SPLIT'].str.strip()
 
-    df[['rainfall_rate_32bit','TO_SPLIT']] = df['TO_SPLIT'].str.split(' ', n=1, expand=True)
+    # Split columns
+    columns = ['rainfall_rate_32bit',
+                'rainfall_accumulated_32bit',
+                'reflectivity_32bit',
+                'number_particles',
+                'sensor_status',
+                'error_code',
+                'raw_drop_concentration',
+                'raw_drop_average_velocity',
+                # 'raw_drop_number'
+                ]
 
-    df['TO_SPLIT'] = df['TO_SPLIT'].str.strip()
-
-    df[['rainfall_accumulated_32bit','TO_SPLIT']] = df['TO_SPLIT'].str.split(' ', n=1, expand=True)
-
-    df['TO_SPLIT'] = df['TO_SPLIT'].str.strip()
-
-    df[['reflectivity_32bit','TO_SPLIT']] = df['TO_SPLIT'].str.split(' ', n=1, expand=True)
-
-    df['TO_SPLIT'] = df['TO_SPLIT'].str.strip()
-
-    df[['number_particles','TO_SPLIT']] = df['TO_SPLIT'].str.split(' ', n=1, expand=True)
-
-    df[['sensor_status','TO_SPLIT']] = df['TO_SPLIT'].str.split(' ', n=1, expand=True)
-
-    df['TO_SPLIT'] = df['TO_SPLIT'].str.strip()
-
-    df[['error_code','TO_SPLIT']] = df['TO_SPLIT'].str.split(' ', n=1, expand=True)
-
-    df[['raw_drop_concentration','TO_SPLIT']] = df['TO_SPLIT'].str.split(' ', n=1, expand=True)
-
-    df[['raw_drop_average_velocity','raw_drop_number']] = df['TO_SPLIT'].str.split(' ', n=1, expand=True)
-
-    df = df.drop(columns = ['TO_SPLIT'])
-    
-    # Chech for integrity data
-    df = df.loc[df['raw_drop_number'].str.count(',') == 1023]
-
+    for c in columns:
+        df['TO_SPLIT'] = df['TO_SPLIT'].str.strip()
+        df[[c,'TO_SPLIT']] = df['TO_SPLIT'].str.split(' ', n=1, expand=True)
+        
     # Add 0 digits to raw_drop_number
     for i, r in df.iterrows():
+        temp_raw = r['TO_SPLIT'].split(',')
         raw = ''
-        t = r['raw_drop_number'].split(',')
-        
-        for n in t:
-            n = '%03d' % int(n) + ','
-            raw += n
+        for n in temp_raw:
+            raw += '%03d' % int(n) + ','
         df['raw_drop_number'] = raw
+
         
-    # Delete index
-    # df = df.set_index('time')
+    # Drop TO_SPLIT column
+    df = df.drop(columns = ['TO_SPLIT'])
         
     return df 
 
@@ -542,7 +520,7 @@ def df_sanitizer_fun(df, lazy=False):
 # - Try with increasing number of files 
 # - Try first with lazy=False, then lazy=True
 lazy = False # True 
-subset_file_list = file_list[:3]
+subset_file_list = file_list[:1]
 # subset_file_list = all_stations_files
 df = read_L0_raw_file_list(file_list=subset_file_list, 
                            column_names=column_names, 
