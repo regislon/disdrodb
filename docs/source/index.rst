@@ -11,7 +11,10 @@ Welcome to disdroDB's documentation!
    
    overview
    install
-   
+   structure
+   reader
+
+   Disdrodb API <modules>    
    :caption: Contents:
 
 
@@ -22,3 +25,5 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+
+
