@@ -25,17 +25,17 @@ Here is the structure of the project :
 |     ├── L1_proc.py
 |     ├── issue.py  
 |     ├── processing.py
-|     ├── production_readers/
+|     ├── readers/
 |         ├── <type_of_reader>/
 |             ├── *.py 
-|     ├── readers/
+|     ├── development readers/
 |         ├── template/
 |             ├── reader_template.py 
 |         ├── <type_of_reader>/
 |             ├── *.py 
 |     ├── configs/
-|     │   ├── <type_of_devices>/
-|     │       ├── *.yml 
+|         ├── <type_of_devices>/
+|             ├── *.yml 
 |     ├── utils/
 |         ├── metadata.py  
 |         ├── metadata_checks.py
